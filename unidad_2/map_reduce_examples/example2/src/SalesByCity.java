@@ -133,11 +133,10 @@ public class SalesByCity {
      *   <ciudad, suma_total>
      */
     public static class SalesReducer
-            extends Reducer<Text, DoubleWritable,
-                             Text, DoubleWritable> {
+        extends Reducer<Text, DoubleWritable,
+                         Text, Text> {
 
-        private final DoubleWritable result =
-                new DoubleWritable();
+        private final Text result = new Text();
 
         @Override
         protected void reduce(
@@ -153,11 +152,15 @@ public class SalesByCity {
                 suma += valor.get();
             }
 
-            result.set(suma);
+            // Formatear el resultado con dos decimales
+            String resultadoFormateado =
+                    String.format("%.2f", suma);
+
+            result.set(resultadoFormateado);
 
             // Emitir:
             //
-            // <ciudad, suma_total>
+            // <ciudad, suma_formateada>
             //
             context.write(
                     ciudad,
@@ -242,7 +245,7 @@ public class SalesByCity {
         // --------------------------------------------------------
 
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(DoubleWritable.class);
+        job.setOutputValueClass(Text.class);
 
 
         // --------------------------------------------------------

@@ -1,0 +1,88 @@
+services:
+
+  # -----------------------------------------------
+  # 1. Flink JobManager
+  # -----------------------------------------------
+
+  jobmanager:
+    build: .
+    image: flink-postgres:1.20.5
+    container_name: jobmanager
+
+    ports:
+      - "8081:8081"
+
+    command: jobmanager
+
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+
+
+  # -----------------------------------------------
+  # 2. Flink TaskManager
+  # -----------------------------------------------
+
+  taskmanager:
+    image: flink-postgres:1.20.5
+    container_name: taskmanager
+
+    depends_on:
+      - jobmanager
+
+    command: taskmanager
+
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 2
+
+
+  # -----------------------------------------------
+  # 3. Flink SQL Client
+  # -----------------------------------------------
+
+  sql-client:
+    image: flink-postgres:1.20.5
+    container_name: sql-client
+
+    depends_on:
+      - jobmanager
+
+    command: bin/sql-client.sh
+
+    environment:
+      FLINK_PROPERTIES: |
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
+
+
+  # -----------------------------------------------
+  # 4. PostgreSQL
+  # -----------------------------------------------
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+
+    ports:
+      - "5432:5432"
+
+    environment:
+      POSTGRES_DB: bigdata
+      POSTGRES_USER: flink
+      POSTGRES_PASSWORD: flink123
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+      # Inicialización automática de tablas
+      - ./init-db:/docker-entrypoint-initdb.d
+
+
+# -----------------------------------------------
+# 5. Volumen persistente PostgreSQL
+# -----------------------------------------------
+
+volumes:
+  postgres_data:

@@ -1,0 +1,38 @@
+//Crear la tabla fuente con DataGen
+//Esta tabla generará registros de empleados de forma continua.
+
+CREATE TABLE employee_information (
+    emp_id INT,
+    name STRING,
+    dept_id INT
+) WITH (
+    'connector' = 'datagen',
+    'rows-per-second' = '5',
+    'fields.emp_id.min' = '1',
+    'fields.emp_id.max' = '1000',
+    'fields.dept_id.min' = '1',
+    'fields.dept_id.max' = '3'
+);
+
+//Crear la tabla del JDBC de salida
+
+CREATE TABLE department_counts (
+    dept_id INT,
+    emp_count BIGINT,
+    PRIMARY KEY (dept_id) NOT ENFORCED
+) WITH (
+    'connector' = 'jdbc',
+    'url' = 'jdbc:postgresql://postgres:5432/bigdata',
+    'table-name' = 'department_counts',
+    'username' = 'flink',
+    'password' = 'flink123'
+);
+
+//Ejecutamos para empezar a generar datos: 
+
+INSERT INTO department_counts
+SELECT
+    dept_id,
+    COUNT(*) AS emp_count
+FROM employee_information
+GROUP BY dept_id;

@@ -1,0 +1,19 @@
+services:
+
+  jupyter-flink:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: jupyter-flink
+
+    ports:
+      - "8888:8888"
+
+    volumes:
+      - ./notebooks:/home/jovyan/work
+
+    environment:
+      JAVA_HOME: /usr/lib/jvm/java-17-openjdk-amd64
+
+    restart: unless-stopped

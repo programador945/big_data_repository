@@ -1,0 +1,9 @@
+#VERIFICAR TOPICOS kafka
+
+docker exec -it kafka /opt/kafka/bin/kafka-topics.sh \
+  --bootstrap-server localhost:9092 \
+  --list
+
+#EJECUTAR JOB PYTHON FLINK
+docker exec -it flink-jobmanager flink run -py /opt/flink/jobs/monitoreo_vehiculos.py
+
